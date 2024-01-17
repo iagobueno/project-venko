@@ -11,7 +11,7 @@ int main(int argc, char* argv[]) {
     // Check command line arguments
     if (argc != 3) {
         std::cout << "[  EXIT  ] Invalid number of arguments. You Must Provide a port and an address to connect." << std::endl;
-        std::cout << "Example: ./exec-client <port> <address>" << std::endl;
+        std::cout << "Example: ./client <port> <address>" << std::endl;
         exit(1);
     }
 

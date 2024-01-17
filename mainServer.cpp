@@ -97,6 +97,8 @@ int main(int argc, char* argv[])
 
     listen(masterSocket, MAX_CONNECTIONS);
 
+    std::cout << "I am listening just fine!" << std::endl;
+
     // The ideia is to listen till timeout
     for (;;) {
 
@@ -106,6 +108,8 @@ int main(int argc, char* argv[])
             std::cout << "[  EXIT  ] Error accepting connection." << std::endl;
             exit(6);
         }
+
+        std::cout << "I accepted the connection!" << std::endl;
 
         pid = fork();
         if (pid < 0) {
@@ -117,13 +121,15 @@ int main(int argc, char* argv[])
         if (pid == 0) {
             close(masterSocket);
             memset(buffer, 0, 256);
-            nBytes = read(masterSocket, buffer, 255);
+            nBytes = read(incSocket, buffer, 255);
             if (nBytes < 0) {
                 std::cout << "[  EXIT  ] Error while reading from socket." << std::endl;
                 exit(8);
             }
 
-            nBytes = write(masterSocket, "I got your message", 18);
+            std::cout << "I receive the message: " << buffer << std::endl;
+
+            nBytes = write(incSocket, "I got your message", 18);
 
             if (nBytes < 0)
             {
@@ -131,6 +137,7 @@ int main(int argc, char* argv[])
                 exit(9);
             }
             close(incSocket);
+            exit(0);
         }
         // Parent process goes back to accept new connections
         else {
