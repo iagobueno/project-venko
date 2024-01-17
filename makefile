@@ -1,22 +1,28 @@
-parametrosCompilacao=-Wall -std=c++20
-parametrosBoost =
-exec-server=exec-server
+PARAMETROSCOMPILACAO=-Wall -std=c++20
+EXEC=server client
 
-OBJ = mainServer.o ServerLib.o
+SERVEROBJ = mainServer.o ServerLib.o
+CLIENTOBJ = mainClient.o
 
-all: $(exec-server)
+all: $(EXEC)
 
-$(exec-server): $(OBJ)
-	g++ -o $(exec-server) $(OBJ) $(parametrosCompilacao) $(parametrosBoost)
+client: $(CLIENTOBJ)
+	g++ -o client $(CLIENTOBJ) $(PARAMETROSCOMPILACAO)
+	
+mainClient.o: mainClient.cpp
+	g++ -c mainClient.cpp $(PARAMETROSCOMPILACAO)
 
+server: $(SERVEROBJ)
+	g++ -o server $(SERVEROBJ) $(PARAMETROSCOMPILACAO)
+	
 mainServer.o: mainServer.cpp
-	g++ -c mainServer.cpp $(parametrosCompilacao)
+	g++ -c mainServer.cpp $(PARAMETROSCOMPILACAO)
 
 ServerLib.o: ServerLib.cpp ServerLib.hpp
-	g++ -c ServerLib.cpp $(parametrosCompilacao)
+	g++ -c ServerLib.cpp $(PARAMETROSCOMPILACAO)
 
 run-server:
-	./$(exec-server) 9896
+	./server 9896
 
 clean:
-	rm -f *.o *.gch $(exec-server)
+	rm -f *.o *.gch server

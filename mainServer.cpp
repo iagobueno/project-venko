@@ -1,42 +1,55 @@
 #include <iostream>
 #include <string>
-#include <stdlib.h>         // atoi
-#include <sys/socket.h>     // socklen_t
+#include <stdlib.h>         // atoi()
+#include <sys/socket.h>     // socket(), socklen_t
 #include <netinet/in.h>     // sockaddr_in
-#include <string.h>         // memset
-#include <unistd.h>         // gethostname
-#include <netdb.h>          // gethostbyname
+#include <string.h>         // memset(), memcpy()
+#include <unistd.h>         // gethostname(), read(), write()
+#include <netdb.h>          // gethostbyname()
+#include <signal.h>         // sigaction
 
 #include "ServerLib.hpp"
 
 #define MAX_HOST_NAME 30
 #define MAX_CONNECTIONS 3
+#define TIMEOUT_SECS 15
+
+// bool timeOut = false;
+
+// void CatchAlarm(int ignored) /* Handler do SIGALRM */
+// {
+//     timeOut = true;
+//     std::cout << "[  EXIT  ] The connection was closed due timeot." << std::endl;
+// }
 
 int main(int argc, char* argv[])
 {
     // Check command line arguments
     if (argc != 2) {
-        std::cout << "[   EXIT   ] Invalid number of arguments. You Must Provide a port." << std::endl;
+        std::cout << "[  EXIT  ] Invalid number of arguments. You Must Provide a port." << std::endl;
         exit(1);
     }
 
     // Gets the port passed through command line
     int port = atoi(argv[1]);
-    std::cout << "Port: " << port << std::endl;
+    if (port < 1024 || port > 49151) {
+        std::cout << "[  EXIT  ] Invalid port range. Make sure that 1023 < port < 49152." << std::endl;
+        exit(-1);
+    }
 
     int masterSocket, incSocket;                // Socket descriptors
 
     // Creates a Socket using IPv4 and TCP protocol
     masterSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (masterSocket < 0) {
-        std::cout << "[   EXIT   ] Error opening the socket." << std::endl;
+        std::cout << "[  EXIT  ] Error opening the socket." << std::endl;
         exit(2);
     }
 
     // Gets localhost on hostname
     char hostname[MAX_HOST_NAME];
     if (gethostname(hostname, MAX_HOST_NAME) != 0) {
-        std::cout << "[   EXIT   ] Error getting hostname.";
+        std::cout << "[  EXIT  ] Error getting hostname.";
         exit(3);
     }
 
@@ -44,7 +57,7 @@ int main(int argc, char* argv[])
     struct hostent* host;
     if ((host = gethostbyname(hostname)) == NULL)
     {
-        std::cout << "[   EXIT   ] Error resolving hostname." << std::endl;
+        std::cout << "[  EXIT  ] Error resolving hostname." << std::endl;
         exit(4);
     }
 
@@ -54,11 +67,11 @@ int main(int argc, char* argv[])
     servAddr.sin_family = AF_INET;              // IPv4 Family
     servAddr.sin_addr.s_addr = INADDR_ANY;      // Accepts connection on all network interfaces
     servAddr.sin_port = htons(port);
-    bcopy((char*)host->h_addr, (char*)&servAddr.sin_addr, host->h_length); /* Copyes the address to server struct */
+    memcpy(&servAddr.sin_addr, host->h_addr, host->h_length);
 
     // Binds master socket to address
     if (bind(masterSocket, (struct sockaddr*)&servAddr, sizeof(servAddr)) < 0) {
-        std::cout << "[   EXIT   ] Error binding address to socket." << std::endl;
+        std::cout << "[  EXIT  ] Error binding address to socket." << std::endl;
         exit(5);
     }
 
@@ -67,30 +80,46 @@ int main(int argc, char* argv[])
     int nBytes;                                 // Store number o bytes that will be readen or written
     int pid;
 
+    // Setting handler to sigalarm that would be used to timeout.
+    // struct sigaction myAction;
+    // myAction.sa_handler = CatchAlarm;
+    // if (sigfillset(&myAction.sa_mask) < 0)
+    // {
+    //     std::cout << "[  EXIT  ] sigfillset() failed." << std::endl;
+    //     exit(10);
+    // }
+    // myAction.sa_flags = 0;
+    // if (sigaction(SIGALRM, &myAction, 0) < 0)
+    // {
+    //     std::cout << "[  EXIT  ] sigaction() failed for SIGALRM." << std::endl;
+    //     exit(10);
+    // }
+
     listen(masterSocket, MAX_CONNECTIONS);
 
     // The ideia is to listen till timeout
     for (;;) {
 
+        // alarm(TIMEOUT_SECS); /* Set the timeout */
         incSocket = accept(masterSocket, (struct sockaddr*)&cliAddr, &cliLenght);
         if (incSocket < 0) {
-            std::cout << "[   EXIT   ] Error accepting connection." << std::endl;
+            std::cout << "[  EXIT  ] Error accepting connection." << std::endl;
             exit(6);
         }
 
         pid = fork();
         if (pid < 0) {
-            std::cout << "[   EXIT   ] Error while creating a new process." << std::endl;
+            std::cout << "[  EXIT  ] Error while creating a new process." << std::endl;
             exit(7);
         }
 
+        // Child process handles communication with new client
         if (pid == 0) {
-            // Child process handles communication with new client
             close(masterSocket);
             memset(buffer, 0, 256);
             nBytes = read(masterSocket, buffer, 255);
             if (nBytes < 0) {
-                std::cout << "[   EXIT   ] Error while reading from socket." << std::endl;
+                std::cout << "[  EXIT  ] Error while reading from socket." << std::endl;
                 exit(8);
             }
 
@@ -98,17 +127,19 @@ int main(int argc, char* argv[])
 
             if (nBytes < 0)
             {
-                std::cout << "[   EXIT   ] Error while writing from socket." << std::endl;
+                std::cout << "[  EXIT  ] Error while writing from socket." << std::endl;
                 exit(9);
             }
-            close(masterSocket);
+            close(incSocket);
         }
+        // Parent process goes back to accept new connections
         else {
-            // Parent process goes back to accept new connections
             close(incSocket);
         }
 
     }
+
+    close(masterSocket);
 
     return 0;
 }
