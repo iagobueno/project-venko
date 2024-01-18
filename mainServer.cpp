@@ -14,14 +14,6 @@
 #define MAX_CONNECTIONS 3
 #define TIMEOUT_SECS 15
 
-// bool timeOut = false;
-
-// void CatchAlarm(int ignored) /* Handler do SIGALRM */
-// {
-//     timeOut = true;
-//     std::cout << "[  EXIT  ] The connection was closed due timeot." << std::endl;
-// }
-
 int main(int argc, char* argv[])
 {
     // Check command line arguments
@@ -37,7 +29,7 @@ int main(int argc, char* argv[])
         exit(-1);
     }
 
-    int masterSocket, incSocket;                // Socket descriptors
+    int masterSocket, newSocket;                // Socket descriptors
 
     // Creates a Socket using IPv4 and TCP protocol
     masterSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -75,25 +67,10 @@ int main(int argc, char* argv[])
         exit(5);
     }
 
-    socklen_t cliLenght = sizeof(cliAddr);                     // The size of the client address structure
+    socklen_t cliLength = sizeof(cliAddr);                     // The size of the client address structure
     char buffer[256];
     int nBytes;                                 // Store number o bytes that will be readen or written
     int pid;
-
-    // Setting handler to sigalarm that would be used to timeout.
-    // struct sigaction myAction;
-    // myAction.sa_handler = CatchAlarm;
-    // if (sigfillset(&myAction.sa_mask) < 0)
-    // {
-    //     std::cout << "[  EXIT  ] sigfillset() failed." << std::endl;
-    //     exit(10);
-    // }
-    // myAction.sa_flags = 0;
-    // if (sigaction(SIGALRM, &myAction, 0) < 0)
-    // {
-    //     std::cout << "[  EXIT  ] sigaction() failed for SIGALRM." << std::endl;
-    //     exit(10);
-    // }
 
     listen(masterSocket, MAX_CONNECTIONS);
 
@@ -102,9 +79,8 @@ int main(int argc, char* argv[])
     // The ideia is to listen till timeout
     for (;;) {
 
-        // alarm(TIMEOUT_SECS); /* Set the timeout */
-        incSocket = accept(masterSocket, (struct sockaddr*)&cliAddr, &cliLenght);
-        if (incSocket < 0) {
+        newSocket = accept(masterSocket, (struct sockaddr*)&cliAddr, &cliLength);
+        if (newSocket < 0) {
             std::cout << "[  EXIT  ] Error accepting connection." << std::endl;
             exit(6);
         }
@@ -124,7 +100,7 @@ int main(int argc, char* argv[])
             int i;
             for (i = 0;i < 2;++i) {
                 memset(buffer, 0, 256);
-                nBytes = read(incSocket, buffer, 255);
+                nBytes = read(newSocket, buffer, 255);
 
                 if (nBytes < 0) {
                     std::cout << "[  EXIT  ] Error while reading from socket." << std::endl;
@@ -133,7 +109,7 @@ int main(int argc, char* argv[])
 
                 std::cout << "I receive the message: " << buffer << std::endl;
 
-                nBytes = write(incSocket, "I got your first message", 18);
+                nBytes = write(newSocket, "I got your first message", 18);
 
                 if (nBytes < 0)
                 {
@@ -142,12 +118,12 @@ int main(int argc, char* argv[])
                 }
             }
 
-            close(incSocket);
+            close(newSocket);
             exit(0);
         }
         // Parent process goes back to accept new connections
         else {
-            close(incSocket);
+            close(newSocket);
         }
 
     }
