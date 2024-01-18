@@ -8,7 +8,7 @@
 #include <netdb.h>          // gethostbyname()
 #include <signal.h>         // sigaction
 
-#include "ServerLib.hpp"
+#include "Server.hpp"
 
 #define MAX_HOST_NAME 30
 #define MAX_CONNECTIONS 3
@@ -120,22 +120,28 @@ int main(int argc, char* argv[])
         // Child process handles communication with new client
         if (pid == 0) {
             close(masterSocket);
-            memset(buffer, 0, 256);
-            nBytes = read(incSocket, buffer, 255);
-            if (nBytes < 0) {
-                std::cout << "[  EXIT  ] Error while reading from socket." << std::endl;
-                exit(8);
+
+            int i;
+            for (i = 0;i < 2;++i) {
+                memset(buffer, 0, 256);
+                nBytes = read(incSocket, buffer, 255);
+
+                if (nBytes < 0) {
+                    std::cout << "[  EXIT  ] Error while reading from socket." << std::endl;
+                    exit(8);
+                }
+
+                std::cout << "I receive the message: " << buffer << std::endl;
+
+                nBytes = write(incSocket, "I got your first message", 18);
+
+                if (nBytes < 0)
+                {
+                    std::cout << "[  EXIT  ] Error while writing from socket." << std::endl;
+                    exit(9);
+                }
             }
 
-            std::cout << "I receive the message: " << buffer << std::endl;
-
-            nBytes = write(incSocket, "I got your message", 18);
-
-            if (nBytes < 0)
-            {
-                std::cout << "[  EXIT  ] Error while writing from socket." << std::endl;
-                exit(9);
-            }
             close(incSocket);
             exit(0);
         }

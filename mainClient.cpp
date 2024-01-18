@@ -51,25 +51,31 @@ int main(int argc, char* argv[]) {
     }
 
     char buffer[256];
-    memset(buffer, 0, sizeof(buffer));  // reset buffer
-    strcpy(buffer, "FALA DERICK AHHAAHAHAHHAHAHAHHAHAHAHAH");
+
+    int i;
     int nBytes;
+    for (i = 0;i < 2;++i) {
+        memset(buffer, 0, sizeof(buffer));  // reset buffer
+        std::cin >> buffer;
+        nBytes = write(cliSocket, buffer, strlen(buffer));
 
-    nBytes = write(cliSocket, buffer, strlen(buffer));
-    if (nBytes < 0)
-    {
-        std::cout << "[  EXIT  ] Error while writing from socket." << std::endl;
-        exit(9);
+        if (nBytes < 0)
+        {
+            std::cout << "[  EXIT  ] Error while writing from socket." << std::endl;
+            exit(9);
+        }
+
+        memset(buffer, 0, sizeof(buffer));  // reset buffer
+
+        nBytes = read(cliSocket, buffer, 255);
+        if (nBytes < 0) {
+            std::cout << "[  EXIT  ] Error while reading from socket." << std::endl;
+            exit(8);
+        }
+
+        std::cout << "Server: " << buffer << std::endl;
     }
 
-    memset(buffer, 0, sizeof(buffer));  // reset buffer
-    nBytes = read(cliSocket, buffer, 255);
-    if (nBytes < 0) {
-        std::cout << "[  EXIT  ] Error while reading from socket." << std::endl;
-        exit(8);
-    }
-
-    std::cout << "Buffer: " << buffer << std::endl;
     close(cliSocket);
 
     return 0;

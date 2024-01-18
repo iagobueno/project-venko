@@ -1,7 +1,7 @@
 PARAMETROSCOMPILACAO=-Wall -std=c++20
 EXEC=server client
 
-SERVEROBJ = mainServer.o ServerLib.o
+SERVEROBJ = MAINSERVER.o Server.o ServerLog.o
 CLIENTOBJ = mainClient.o
 
 all: $(EXEC)
@@ -15,11 +15,14 @@ mainClient.o: mainClient.cpp
 server: $(SERVEROBJ)
 	g++ -o server $(SERVEROBJ) $(PARAMETROSCOMPILACAO)
 	
-mainServer.o: mainServer.cpp
-	g++ -c mainServer.cpp $(PARAMETROSCOMPILACAO)
+MAINSERVER.o: MAINSERVER.cpp
+	g++ -c MAINSERVER.cpp $(PARAMETROSCOMPILACAO)
 
-ServerLib.o: ServerLib.cpp ServerLib.hpp
-	g++ -c ServerLib.cpp $(PARAMETROSCOMPILACAO)
+Server.o: Server.cpp Server.hpp
+	g++ -c Server.cpp $(PARAMETROSCOMPILACAO)
+
+ServerLog.o: ServerLog.cpp ServerLog.hpp
+	g++ -c ServerLog.cpp $(PARAMETROSCOMPILACAO)
 
 run-server:
 	./server 9896
