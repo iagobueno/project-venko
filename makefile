@@ -1,7 +1,7 @@
 #### VARIABLES
 
 CFLAGS=-Wall -std=c++20
-EXEC=server client
+EXEC=server.elf client.elf
 
 SERVEROBJ = mainServer.o Server.o ServerLog.o
 CLIENTOBJ = mainClient.o Client.o UserInterface.o
@@ -12,8 +12,8 @@ all: $(EXEC)
 
 #### CLIENT RULES
 
-client: $(CLIENTOBJ)
-	g++ -o client $(CLIENTOBJ) $(CFLAGS)
+client.elf: $(CLIENTOBJ)
+	g++ -o client.elf $(CLIENTOBJ) $(CFLAGS)
 	
 mainClient.o: mainClient.cpp
 	g++ -c mainClient.cpp $(CFLAGS)
@@ -26,8 +26,8 @@ UserInterface.o: UserInterface.cpp UserInterface.hpp
 
 #### SERVER RULES
 
-server: $(SERVEROBJ)
-	g++ -o server $(SERVEROBJ) $(CFLAGS)
+server.elf: $(SERVEROBJ)
+	g++ -o server.elf $(SERVEROBJ) $(CFLAGS)
 	
 mainServer.o: mainServer.cpp
 	g++ -c mainServer.cpp $(CFLAGS)
@@ -44,4 +44,4 @@ run-server:
 #### SANITIZER RULES
 
 clean:
-	rm -f *.o *.gch server
+	rm -f *.o *.gch .elf
