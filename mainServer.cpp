@@ -1,134 +1,119 @@
 #include <iostream>
-#include <string>
-#include <stdlib.h>         // atoi()
-#include <sys/socket.h>     // socket(), socklen_t
-#include <netinet/in.h>     // sockaddr_in
-#include <string.h>         // memset(), memcpy()
-#include <unistd.h>         // gethostname(), read(), write()
-#include <netdb.h>          // gethostbyname()
-#include <signal.h>         // sigaction
 
 #include "Server.hpp"
+#include "ServerLog.hpp"
+#include <string.h>
+#include <fstream>
 
-#define MAX_HOST_NAME 30
-#define MAX_CONNECTIONS 3
-#define TIMEOUT_SECS 15
+int main(int argc, char* argv[]) {
 
-int main(int argc, char* argv[])
-{
-    // Check command line arguments
-    if (argc != 2) {
-        std::cout << "[  EXIT  ] Invalid number of arguments. You Must Provide a port." << std::endl;
+    // Create an instance of ServerLog class and open try to open Log file
+    ServerLog* log{ nullptr };
+    try {
+        log = new ServerLog{};
+    }
+    catch (const std::ofstream::failure& e) {
+        std::cout << "Exception opening/reading ./log/server.log" << std::endl;
+    }
+
+    // Check number of command line arguments
+    if (argc < 2 || argc > 3) {
+        log->Help();
+        delete log;
         exit(1);
     }
 
-    // Gets the port passed through command line
-    int port = atoi(argv[1]);
-    if (port < 1024 || port > 49151) {
-        std::cout << "[  EXIT  ] Invalid port range. Make sure that 1023 < port < 49152." << std::endl;
-        exit(-1);
+    // Check the quiet flag, so the terminal will not output anything
+    if (argv[2] != NULL) {
+        if (!strcmp(argv[2], "quiet")) {
+            log->setMode(1);
+        }
+        else {
+            log->writeLog("Server FAILED to Start. Invalid flag at command line.");
+            delete log;
+            exit(1);
+        }
     }
 
-    int masterSocket, newSocket;                // Socket descriptors
-
-    // Creates a Socket using IPv4 and TCP protocol
-    masterSocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (masterSocket < 0) {
-        std::cout << "[  EXIT  ] Error opening the socket." << std::endl;
-        exit(2);
+    // Create an instance of a server.
+    Server* s{ nullptr };
+    try {
+        s = new Server{ argv[1] };
     }
-
-    // Gets localhost on hostname
-    char hostname[MAX_HOST_NAME];
-    if (gethostname(hostname, MAX_HOST_NAME) != 0) {
-        std::cout << "[  EXIT  ] Error getting hostname.";
-        exit(3);
-    }
-
-    /* Resolve the name */
-    struct hostent* host;
-    if ((host = gethostbyname(hostname)) == NULL)
-    {
-        std::cout << "[  EXIT  ] Error resolving hostname." << std::endl;
-        exit(4);
-    }
-
-    struct sockaddr_in servAddr, cliAddr;       // Structure to server/client address information
-
-    memset(&servAddr, 0, sizeof(servAddr));
-    servAddr.sin_family = AF_INET;              // IPv4 Family
-    servAddr.sin_addr.s_addr = INADDR_ANY;      // Accepts connection on all network interfaces
-    servAddr.sin_port = htons(port);
-    memcpy(&servAddr.sin_addr, host->h_addr, host->h_length);
-
-    // Binds master socket to address
-    if (bind(masterSocket, (struct sockaddr*)&servAddr, sizeof(servAddr)) < 0) {
-        std::cout << "[  EXIT  ] Error binding address to socket." << std::endl;
-        exit(5);
-    }
-
-    socklen_t cliLength = sizeof(cliAddr);                     // The size of the client address structure
-    char buffer[256];
-    int nBytes;                                 // Store number o bytes that will be readen or written
-    int pid;
-
-    listen(masterSocket, MAX_CONNECTIONS);
-
-    std::cout << "I am listening just fine!" << std::endl;
-
-    // The ideia is to listen till timeout
-    for (;;) {
-
-        newSocket = accept(masterSocket, (struct sockaddr*)&cliAddr, &cliLength);
-        if (newSocket < 0) {
-            std::cout << "[  EXIT  ] Error accepting connection." << std::endl;
-            exit(6);
+    catch (int& e) {
+        if (e == 1) {
+            log->writeLog("Server FAILED to Start. Invalid port range at command line.");
+            std::cout << "Make sure that port is a number between [1023.. 49152]." << std::endl;
+        }
+        else if (e == 2) {
+            log->writeLog("Server FAILED to Start. Error while opening socket.");
+        }
+        else if (e == 3) {
+            log->writeLog("Server FAILED to Start. Error getting hostname.");
+        }
+        else if (e == 4) {
+            log->writeLog("Server FAILED to Start. Error resolving hostname.");
+        }
+        else if (e == 5) {
+            log->writeLog("Server FAILED to Start. Error binding address to socket.");
+        }
+        else if (e == 6) {
+            log->writeLog("Server FAILED to Start. Error while listening on master socket.");
+        }
+        else {
+            log->writeLog("Server FAILED to Start. Unknown Error.");
         }
 
-        std::cout << "I accepted the connection!" << std::endl;
+        delete log;
+        delete s;
+        exit(1);
+    }
 
+    std::string logBuffer{ "Server STARTED and is listening on port " };
+    logBuffer.append(std::to_string(s->getPort()));
+    logBuffer.append(".");
+    log->writeLog(logBuffer);
+
+    int pid;
+    for (;;) {
+
+        // Server keeps awaiting a new connection
+        try {
+            s->acceptNewSession();
+        }
+        catch (int& e) {
+            if (e == 1) {
+                log->writeLog("ERROR accepting new connection.");
+                delete(log);
+                delete(s);
+                exit(1);
+            }
+        }
+
+        log->writeLog("Server Accepted a new connection!");
+
+        // Creates a new process to handle new session with client
         pid = fork();
         if (pid < 0) {
-            std::cout << "[  EXIT  ] Error while creating a new process." << std::endl;
-            exit(7);
+            log->writeLog("ERROR While creating a new process. Server stopped.");
+            exit(2);
         }
 
         // Child process handles communication with new client
         if (pid == 0) {
-            close(masterSocket);
-
-            int i;
-            for (i = 0;i < 2;++i) {
-                memset(buffer, 0, 256);
-                nBytes = read(newSocket, buffer, 255);
-
-                if (nBytes < 0) {
-                    std::cout << "[  EXIT  ] Error while reading from socket." << std::endl;
-                    exit(8);
-                }
-
-                std::cout << "I receive the message: " << buffer << std::endl;
-
-                nBytes = write(newSocket, "I got your first message", 18);
-
-                if (nBytes < 0)
-                {
-                    std::cout << "[  EXIT  ] Error while writing from socket." << std::endl;
-                    exit(9);
-                }
-            }
-
-            close(newSocket);
+            s->closeMaster();
+            s->handleCliComm(log);
+            log->writeLog("Client CLOSED connection with Server.");
             exit(0);
         }
+
         // Parent process goes back to accept new connections
         else {
-            close(newSocket);
+            s->closeNewSocket();
         }
-
     }
 
-    close(masterSocket);
-
+    delete log;
+    delete s;
     return 0;
 }

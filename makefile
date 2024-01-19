@@ -1,31 +1,44 @@
-PARAMETROSCOMPILACAO=-Wall -std=c++20
+#### VARIABLES
+
+CFLAGS=-Wall -std=c++20
 EXEC=server client
 
-SERVEROBJ = MAINSERVER.o Server.o ServerLog.o
-CLIENTOBJ = mainClient.o
+SERVEROBJ = mainServer.o Server.o ServerLog.o
+CLIENTOBJ = mainClient.o Client.o
+
+#### ALL EXECUTABLES
 
 all: $(EXEC)
 
+#### CLIENT RULES
+
 client: $(CLIENTOBJ)
-	g++ -o client $(CLIENTOBJ) $(PARAMETROSCOMPILACAO)
+	g++ -o client $(CLIENTOBJ) $(CFLAGS)
 	
 mainClient.o: mainClient.cpp
-	g++ -c mainClient.cpp $(PARAMETROSCOMPILACAO)
+	g++ -c mainClient.cpp $(CFLAGS)
+
+Client.o: Client.cpp Client.hpp
+	g++ -c Client.cpp $(CFLAGS)
+
+#### SERVER RULES
 
 server: $(SERVEROBJ)
-	g++ -o server $(SERVEROBJ) $(PARAMETROSCOMPILACAO)
+	g++ -o server $(SERVEROBJ) $(CFLAGS)
 	
-MAINSERVER.o: MAINSERVER.cpp
-	g++ -c MAINSERVER.cpp $(PARAMETROSCOMPILACAO)
+mainServer.o: mainServer.cpp
+	g++ -c mainServer.cpp $(CFLAGS)
 
 Server.o: Server.cpp Server.hpp
-	g++ -c Server.cpp $(PARAMETROSCOMPILACAO)
+	g++ -c Server.cpp $(CFLAGS)
 
 ServerLog.o: ServerLog.cpp ServerLog.hpp
-	g++ -c ServerLog.cpp $(PARAMETROSCOMPILACAO)
+	g++ -c ServerLog.cpp $(CFLAGS)
 
 run-server:
 	./server 9896
+
+#### SANITIZER RULES
 
 clean:
 	rm -f *.o *.gch server
