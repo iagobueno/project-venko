@@ -3,3 +3,6 @@ Fri Jan 19 00:12:05 2024 instance server[106456]: Server Accepted a new connecti
 Fri Jan 19 00:14:40 2024 instance server[106803]: Server STARTED and is listening on port 8989.
 Fri Jan 19 00:14:55 2024 instance server[106803]: Server Accepted a new connection!
 Fri Jan 19 00:15:10 2024 instance server[106803]: Client CLOSED connection with Server.
+Fri Jan 19 00:56:17 2024 instance server[114953]: Server FAILED to Start. Invalid port range at command line.
+Fri Jan 19 00:56:22 2024 instance server[114984]: Server FAILED to Start. Invalid port range at command line.
+Fri Jan 19 00:56:34 2024 instance server[115070]: Server STARTED and is listening on port 4002.

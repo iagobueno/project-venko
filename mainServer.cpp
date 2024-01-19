@@ -35,6 +35,8 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    log->writeLog("Starting Venko Project 1.0.0. server...");
+
     // Create an instance of a server.
     Server* s{ nullptr };
     try {

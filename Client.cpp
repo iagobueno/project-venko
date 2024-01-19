@@ -1,4 +1,5 @@
 #include "Client.hpp"
+#include "UserInterface.hpp"
 
 #include <sys/socket.h>     // socket(), socklen_t
 #include <netdb.h>          // gethostbyname()
@@ -66,6 +67,9 @@ void Client::commWithServer() {
     int nBytes;
     for (i = 0;i < 2;++i) {
         memset(buffer, 0, sizeof(buffer));  // reset buffer
+
+        // int opt{ 0 };
+
         std::cin >> buffer;
         nBytes = write(cliSocket, buffer, strlen(buffer));
 

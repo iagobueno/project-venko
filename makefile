@@ -4,7 +4,7 @@ CFLAGS=-Wall -std=c++20
 EXEC=server client
 
 SERVEROBJ = mainServer.o Server.o ServerLog.o
-CLIENTOBJ = mainClient.o Client.o
+CLIENTOBJ = mainClient.o Client.o UserInterface.o
 
 #### ALL EXECUTABLES
 
@@ -20,6 +20,9 @@ mainClient.o: mainClient.cpp
 
 Client.o: Client.cpp Client.hpp
 	g++ -c Client.cpp $(CFLAGS)
+
+UserInterface.o: UserInterface.cpp UserInterface.hpp
+	g++ -c UserInterface.cpp $(CFLAGS)
 
 #### SERVER RULES
 

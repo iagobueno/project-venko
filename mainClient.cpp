@@ -1,8 +1,14 @@
 #include <iostream>
 #include "Client.hpp"
+#include "UserInterface.hpp"
 
 int main(int argc, char* argv[]) {
 
+    UserInterface* u{ new UserInterface() };
+    u->help();
+    std::cout << u->readOpt();
+
+    return 0;
 
     // Check command line arguments
     if (argc != 3) {

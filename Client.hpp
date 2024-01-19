@@ -2,6 +2,7 @@
 #define CLIENT_H
 
 #include <netinet/in.h>             // sockaddr_in
+#include <string>
 
 class Client {
 public:
@@ -17,6 +18,8 @@ private:
     int port;                       // port number
     int cliSocket;                  // client socket
     struct sockaddr_in servAddr;    // Structure to server address information
+    std::string userName;
+    std::string serverName;
 
     bool checkPort(const int port);
 };
