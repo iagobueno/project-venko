@@ -1,6 +1,7 @@
 #include "UserInterface.hpp"
 #include <iostream>
 #include <climits>          // INT_MAX
+#include <sstream>
 
 void UserInterface::help() {
     std::cout << std::endl << "The following commands are available:" << std::endl;
@@ -83,8 +84,19 @@ std::string UserInterface::readOpt() {
     std::string inputBuffer;
     std::getline(std::cin, inputBuffer);
 
+    // extract command and possible argument
+    std::istringstream iss(inputBuffer);
+    std::string command, arg;
+    iss >> command;
+    iss >> arg;
+
     // Checks if there is any special character
-    if (!isAlfaNum(inputBuffer)) {
+    if (!isAlfaNum(command)) {
+        throw(int)1;
+    }
+
+    // Checks if there is any special character
+    if (!isAlfaNum(arg)) {
         throw(int)1;
     }
 

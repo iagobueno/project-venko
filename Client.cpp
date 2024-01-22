@@ -79,61 +79,19 @@ std::string Client::getServerName() {
     return this->serverName;
 }
 
-void Client::listFiles() {
-
-    std::string msg{ "0 " };        // protocol version
-    msg.append("list");           // command
-
-    sendData(msg);
-    std::cout << recData() << std::endl << std::endl;
-}
-
-void Client::parseInput(std::string inputBuffer) {
-
-    // extract first(command) and possible second word ( fileName)
-    std::istringstream iss(inputBuffer);
-    std::string command, fileName;
-    iss >> command;
-    iss >> fileName;
-
-    if (command == "help" || command == "h") {
-        if (fileName != "") {
-            throw(int)2;
-        }
-        ui.help();
-    }
-    if (command == "list" || command == "ls") {
-        if (fileName != "") {
-            throw(int)2;
-        }
-        listFiles();
-    }
-    else if (command == "quit" || command == "exit") {
-        if (fileName != "") {
-            throw(int)2;
-        }
-        this->quit = true;
-    }
-    // else if (command == "remove" || command == "rm") {
-    // }
-    // else if (command == "get") {
-    // }
-    // else if (command == "upload") {
-    // }
-    // return 0;
-
-}
-
 void Client::sendData(std::string data) {
-    int nBytes;
-    char buffer[BUFFER_SIZE];
 
+    // Creates buffer and makes sure it is clean
+    char buffer[BUFFER_SIZE];
     memset(buffer, 0, BUFFER_SIZE);
+
+    // Cast string data to char
     const char* cstr = data.c_str();
     memcpy(buffer, cstr, sizeof(buffer));
 
+    // Writes char of data on client Socket
+    int nBytes;
     nBytes = write(this->cliSocket, buffer, BUFFER_SIZE);
-
     if (nBytes < 0)
     {
         std::cout << "Error while writing on socket." << std::endl;
@@ -141,8 +99,9 @@ void Client::sendData(std::string data) {
 }
 
 std::string Client::recData() {
-    int nBytes;
+
     char buffer[BUFFER_SIZE];
+    int nBytes;
 
     memset(buffer, 0, BUFFER_SIZE);
     nBytes = read(this->cliSocket, buffer, BUFFER_SIZE);
@@ -155,23 +114,92 @@ std::string Client::recData() {
     return ret;
 }
 
+void Client::endConnection() {
+
+    std::string msg{ "0 " };        // protocol version
+    msg.append("quit ");            // command
+
+    // Send and receive data to confirm that connection was established
+    sendData(msg);
+    std::cout << recData() << std::endl << std::endl;
+
+    this->quit = true;
+}
+
+void Client::removeFile(std::string fileName) {
+    std::string msg{ "0 " };      // protocol version
+    msg.append("remove ");           // command
+    msg.append(fileName);           // fileName
+
+    sendData(msg);
+    std::cout << recData() << std::endl << std::endl;
+}
+
+void Client::listFiles() {
+
+    std::string msg{ "0 " };      // protocol version
+    msg.append("list");           // command
+
+    sendData(msg);
+    std::cout << recData() << std::endl << std::endl;
+}
+
 void Client::helloServer() {
 
     std::string msg{ "0 " };        // protocol version
     msg.append("hello ");           // command
     msg.append(getUserName());      // userName
 
+    // Send and receive data to confirm that connection was established
     sendData(msg);
     std::cout << recData() << std::endl << std::endl;
 }
 
+void Client::parseInput(std::string inputBuffer) {
+
+    // extract command and possible argument
+    std::istringstream iss(inputBuffer);
+    std::string command, arg;
+    iss >> command;
+    iss >> arg;
+
+    if (arg.length() > MAX_FILE_NAME) {
+        throw (int)3;
+    }
+
+    if (command == "help" || command == "h") {
+        if (arg != "") {
+            throw(int)2;
+        }
+        ui.help();
+    }
+    else if (command == "list" || command == "ls") {
+        if (arg != "") {
+            throw(int)2;
+        }
+        listFiles();
+    }
+    else if (command == "quit" || command == "exit") {
+        if (arg != "") {
+            throw(int)2;
+        }
+        endConnection();
+    }
+    else if (command == "remove" || command == "rm") {
+        removeFile(arg);
+    }
+    else {
+        throw(int)4;
+    }
+
+}
 
 void Client::commWithServer() {
 
+    // signal that the connection was established successfully
     helloServer();
 
     for (;!this->quit;) {
-        //         memset(msg.buffer, 0, sizeof(msg.buffer));  // reset buffer
 
         // Prints [user@machine] $
         ui.prompt(getUserName(), getServerName());
@@ -184,12 +212,20 @@ void Client::commWithServer() {
             if (error == 1) {
                 std::cout << std::endl << "Special characteres are not allowed." << std::endl;
             }
-            if (error == 2) {
+            else if (error == 2) {
                 std::cout << std::endl << "No options or arguments are needed to this command." << std::endl;
             }
+            else if (error == 3) {
+                std::cout << "Filename must have a maximum length of 32" << std::endl << std::endl;
+            }
+            else if (error == 4) {
+                std::cout << "Command not found." << std::endl << std::endl;
+            }
+            else {
+                std::cout << "Unknown error while parsing input." << std::endl << std::endl;
+            }
+
             std::cout << "If you're lost, type \"help\" and hit Enter." << std::endl << std::endl;
         }
-
     }
-
 }

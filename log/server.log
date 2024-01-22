@@ -57,3 +57,42 @@ Mon Jan 22 03:45:27 2024 Venko server[26308]: Server STARTED and is listening on
 Mon Jan 22 03:45:32 2024 Venko server[26308]: Server Accepted a new connection!
 Mon Jan 22 03:45:36 2024 Venko server[26308]: Session opened for user user3 from 127.0.0.1.
 Mon Jan 22 03:45:52 2024 Venko server[26308]: Client CLOSED connection with Server.
+Mon Jan 22 15:43:37 2024 Venko server[20191]: Starting Venko Project 1.0.0. server...
+Mon Jan 22 15:43:37 2024 Venko server[20191]: Server STARTED and is listening on port 9090.
+Mon Jan 22 15:43:46 2024 Venko server[20191]: Server Accepted a new connection!
+Mon Jan 22 15:43:51 2024 Venko server[20191]: Session opened for user user3 from 127.0.0.1.
+Mon Jan 22 15:45:24 2024 Venko server[20257]: Starting Venko Project 1.0.0. server...
+Mon Jan 22 15:45:24 2024 Venko server[20257]: Server STARTED and is listening on port 9091.
+Mon Jan 22 15:45:27 2024 Venko server[20257]: Server Accepted a new connection!
+Mon Jan 22 15:45:30 2024 Venko server[20257]: Session opened for user iago from 127.0.0.1.
+Mon Jan 22 15:45:30 2024 Venko server[20257]: Directory for user iago was created successfully.
+Mon Jan 22 15:45:39 2024 Venko server[20257]: Server Accepted a new connection!
+Mon Jan 22 15:45:42 2024 Venko server[20257]: Session opened for user iago from 127.0.0.1.
+Mon Jan 22 15:53:56 2024 Venko server[20498]: Starting Venko Project 1.0.0. server...
+Mon Jan 22 15:53:56 2024 Venko server[20498]: Server STARTED and is listening on port 9091.
+Mon Jan 22 15:53:58 2024 Venko server[20498]: Server Accepted a new connection!
+Mon Jan 22 15:54:08 2024 Venko server[20498]: Session opened for user user3 from 127.0.0.1.
+Mon Jan 22 16:05:52 2024 Venko server[22238]: Starting Venko Project 1.0.0. server...
+Mon Jan 22 16:05:52 2024 Venko server[22238]: Server FAILED to Start. Invalid port range at command line.
+Mon Jan 22 17:56:37 2024 Venko server[27160]: Starting Venko Project 1.0.0. server...
+Mon Jan 22 17:56:37 2024 Venko server[27160]: Server STARTED and is listening on port 9090.
+Mon Jan 22 17:56:56 2024 Venko server[27160]: Server Accepted a new connection!
+Mon Jan 22 17:58:02 2024 Venko server[27293]: Starting Venko Project 1.0.0. server...
+Mon Jan 22 17:58:02 2024 Venko server[27293]: Server STARTED and is listening on port 9090.
+Mon Jan 22 17:58:13 2024 Venko server[27293]: Server Accepted a new connection!
+Mon Jan 22 18:31:40 2024 Venko server[28392]: Starting Venko Project 1.0.0. server...
+Mon Jan 22 18:31:40 2024 Venko server[28392]: Server STARTED and is listening on port 8080.
+Mon Jan 22 18:31:47 2024 Venko server[28392]: Server Accepted a new connection!
+Mon Jan 22 18:31:49 2024 Venko server[28392]: Session opened for user iago from 127.0.0.1.
+Mon Jan 22 18:34:45 2024 Venko server[28538]: Starting Venko Project 1.0.0. server...
+Mon Jan 22 18:34:45 2024 Venko server[28538]: Server STARTED and is listening on port 8080.
+Mon Jan 22 18:34:47 2024 Venko server[28538]: Server Accepted a new connection!
+Mon Jan 22 18:34:51 2024 Venko server[28538]: Session opened for user user3 from 127.0.0.1.
+Mon Jan 22 18:35:02 2024 Venko server[28538]: File file1 removed successfully by user user3.
+Mon Jan 22 18:35:25 2024 Venko server[28538]: Client user3 CLOSED connection with Server.
+Mon Jan 22 18:57:15 2024 Venko server[29127]: Starting Venko Project 1.0.0. server...
+Mon Jan 22 18:57:15 2024 Venko server[29127]: Server STARTED and is listening on port 9090.
+Mon Jan 22 18:57:21 2024 Venko server[29127]: Server Accepted a new connection!
+Mon Jan 22 18:57:28 2024 Venko server[29127]: Session opened for user user3 from 127.0.0.1.
+Mon Jan 22 18:58:28 2024 Venko server[29127]: File file1 removed successfully by user user3.
+Mon Jan 22 18:59:43 2024 Venko server[29127]: Client user3 CLOSED connection with Server.

@@ -56,6 +56,8 @@ Server::Server(const char* port, ServerLog* log) {
         throw (int)6;
     }
 
+    this->quit = false;
+
 }
 
 Server::~Server() {
@@ -150,17 +152,56 @@ void Server::checkUserDir() {
 
         // Create the directory
         if (std::filesystem::create_directory(userDirPath)) {
+
+            // Create log string and write log
             std::string logDir{ "Directory for user " };
             logDir.append(getCurrentUser());
             logDir.append(" was created successfully.");
             this->log->writeLog(logDir);
         }
         else {
+            // Create error log string and write log
             std::string logDir{ "Error creating directory for user " };
             logDir.append(getCurrentUser());
             logDir.append(".");
             this->log->writeLog(logDir);
         }
+    }
+}
+
+void Server::removeFile(std::string fileName) {
+
+    std::string filePath{ "./" };
+    filePath.append(getCurrentUser());
+    filePath.append("/");
+    filePath.append(fileName);
+
+    try {
+        // Remove the file
+        std::filesystem::remove(filePath);
+
+        // Create log string
+        std::string logBuffer{ "File " };
+        logBuffer.append(fileName);
+        logBuffer.append(" removed successfully by user ");
+        logBuffer.append(getCurrentUser());
+        logBuffer.append(".");
+
+        // Write log and send message through network
+        this->log->writeLog(logBuffer);
+        sendData("File removed succesfully.");
+    }
+    catch (const std::filesystem::filesystem_error& ex) {
+        // Create error log string
+        std::string logBuffer{ "Error while removing file " };
+        logBuffer.append(fileName);
+        logBuffer.append(" by user ");
+        logBuffer.append(getCurrentUser());
+        logBuffer.append(".");
+
+        // Write log and send message through network
+        this->log->writeLog(logBuffer);
+        sendData("Error while removing file");
     }
 }
 
@@ -190,6 +231,16 @@ void Server::listFiles() {
     }
 }
 
+void Server::closeConnection() {
+    this->quit = true;
+
+    std::string logBuffer{ "Client " };
+    logBuffer.append(getCurrentUser());
+    logBuffer.append(" CLOSED connection with Server.");
+    log->writeLog(logBuffer);
+    sendData("Thanks for using Venko Project 1.0.0.");
+}
+
 void Server::parseCliMsg() {
     std::string s{ this->buffer };              // converts char buffer into string
     std::istringstream iss(s);                  // then converts string into iss stream
@@ -198,11 +249,17 @@ void Server::parseCliMsg() {
 
     if (command == "hello") {
         setCurrentUser(arg);
-        this->log->writeLog(helloClient());
         checkUserDir();
+        this->log->writeLog(helloClient());
     }
-    if (command == "list" || command == "ls") {
+    else if (command == "list" || command == "ls") {
         listFiles();
+    }
+    else if (command == "quit" || command == "exit") {
+        closeConnection();
+    }
+    else if (command == "remove" || command == "rm") {
+        removeFile(arg);
     }
 }
 
@@ -210,8 +267,8 @@ void Server::handleCliComm() {
     // Reset buffer
     memset(this->buffer, 0, BUFFER_SIZE);
 
-    int nBytes, i;
-    for (i = 0;i < 2;++i) {
+    int nBytes;
+    for (;!this->quit;) {
         // clear buffer and read from socket
         memset(buffer, 0, BUFFER_SIZE);
         nBytes = read(this->newSocket, buffer, BUFFER_SIZE);
@@ -221,13 +278,6 @@ void Server::handleCliComm() {
         }
 
         parseCliMsg();
-
-        // nBytes = write(this->newSocket, "I got your message.", 19);
-
-        // if (nBytes < 0)
-        // {
-        //     log->writeLog("Error while writing on socket.");
-        // }
     }
 
     close(this->newSocket);

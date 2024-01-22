@@ -21,10 +21,14 @@ public:
 
     void helloServer();
     void listFiles();
+    void endConnection();
+    void removeFile(std::string fileName);
+
     void parseInput(std::string inputBuffer);
     void commWithServer();                      // handle all communication with server
 
     constexpr static int BUFFER_SIZE{ 256 };
+    constexpr static int MAX_FILE_NAME{ 32 };
 
 private:
     int port;                                   // port number

@@ -106,7 +106,6 @@ int main(int argc, char* argv[]) {
         if (pid == 0) {
             s->closeMaster();
             s->handleCliComm();
-            log->writeLog("Client CLOSED connection with Server.");
             exit(0);
         }
 

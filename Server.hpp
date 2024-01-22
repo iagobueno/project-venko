@@ -15,21 +15,26 @@ public:
     void setPort(const int port);
     int getPort();
 
+    // Socket related functions
     void acceptNewSession();
     void closeNewSocket();
     void closeMaster();
 
-    void sendData(std::string data);
+    // Operational related functions
     std::string helloClient();
     void listFiles();
-    void checkUserDir();
+    void closeConnection();
+    void removeFile(std::string fileName);
 
+    // Network message related functions
+    void sendData(std::string data);
     void handleCliComm();
     void parseCliMsg();
 
     void setCurrentUser(const std::string cUser);
     std::string getCurrentUser();
 
+    // Defines
     constexpr static int MAX_HOST_NAME{ 50 };
     constexpr static int MAX_CONNECTIONS{ 3 };
     constexpr static int BUFFER_SIZE{ 256 };
@@ -42,10 +47,12 @@ private:
     struct sockaddr_in cliAddr;     // Structure to client address information
     socklen_t cliLength;            // The size of the client address structure
     char buffer[256];
-    std::string currentUser;
-    ServerLog* log;
+    std::string currentUser;        // Current user on session
+    ServerLog* log;                 // ServerLog pointer
+    bool quit;                      // It's false till user is connected
 
-    bool checkPort(const int port);
+    bool checkPort(const int port); // Checks port range
+    void checkUserDir();            // Checks if user directory exists and create one if don't
 };
 
 #endif
