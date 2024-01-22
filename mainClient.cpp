@@ -4,12 +4,6 @@
 
 int main(int argc, char* argv[]) {
 
-    UserInterface* u{ new UserInterface() };
-    u->help();
-    std::cout << u->readOpt();
-
-    return 0;
-
     // Check command line arguments
     if (argc != 3) {
         std::cout << std::endl << "Client could not start properly." << std::endl;

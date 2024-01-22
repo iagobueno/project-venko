@@ -48,5 +48,5 @@ void ServerLog::writeLog(const std::string msg) {
     if (!getMode()) {
         std::cout << msg << std::endl;
     }
-    this->logFile << getTime() << " instance server[" << getPid() << "]: " << msg << std::endl;
+    this->logFile << getTime() << " Venko server[" << getPid() << "]: " << msg << std::endl;
 }

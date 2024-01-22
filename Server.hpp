@@ -9,7 +9,7 @@
 class Server {
 
 public:
-    Server(const char* port);
+    Server(const char* port, ServerLog* log);
     ~Server();
 
     void setPort(const int port);
@@ -18,7 +18,17 @@ public:
     void acceptNewSession();
     void closeNewSocket();
     void closeMaster();
-    void handleCliComm(ServerLog* log);
+
+    void sendData(std::string data);
+    std::string helloClient();
+    void listFiles();
+    void checkUserDir();
+
+    void handleCliComm();
+    void parseCliMsg();
+
+    void setCurrentUser(const std::string cUser);
+    std::string getCurrentUser();
 
     constexpr static int MAX_HOST_NAME{ 50 };
     constexpr static int MAX_CONNECTIONS{ 3 };
@@ -32,6 +42,8 @@ private:
     struct sockaddr_in cliAddr;     // Structure to client address information
     socklen_t cliLength;            // The size of the client address structure
     char buffer[256];
+    std::string currentUser;
+    ServerLog* log;
 
     bool checkPort(const int port);
 };

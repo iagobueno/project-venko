@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
     // Create an instance of a server.
     Server* s{ nullptr };
     try {
-        s = new Server{ argv[1] };
+        s = new Server{ argv[1], log };
     }
     catch (int& e) {
         if (e == 1) {
@@ -71,6 +71,7 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
+    // Append port to string and write on logfile
     std::string logBuffer{ "Server STARTED and is listening on port " };
     logBuffer.append(std::to_string(s->getPort()));
     logBuffer.append(".");
@@ -104,7 +105,7 @@ int main(int argc, char* argv[]) {
         // Child process handles communication with new client
         if (pid == 0) {
             s->closeMaster();
-            s->handleCliComm(log);
+            s->handleCliComm();
             log->writeLog("Client CLOSED connection with Server.");
             exit(0);
         }
