@@ -34,3 +34,18 @@ Tue Jan 23 17:44:58 2024 Venko server[46994]: Server STARTED and is listening on
 Tue Jan 23 17:45:06 2024 Venko server[46994]: Server Accepted a new connection!.
 Tue Jan 23 17:45:12 2024 Venko server[46994]: Session opened for user teste from 127.0.0.1..
 Tue Jan 23 17:45:26 2024 Venko server[46994]: File file12.pdf received from user teste.
+Tue Jan 23 18:13:45 2024 Venko server[48631]: Starting Venko Project 1.0.0. server....
+Tue Jan 23 18:13:45 2024 Venko server[48631]: Server STARTED and is listening on port 9090..
+Tue Jan 23 18:13:53 2024 Venko server[48631]: Server Accepted a new connection!.
+Tue Jan 23 18:13:56 2024 Venko server[48631]: Directory for user iago was created successfully.
+Tue Jan 23 18:13:56 2024 Venko server[48631]: Session opened for user iago from 127.0.0.1..
+Tue Jan 23 18:15:08 2024 Venko server[48631]: File file.txt sended to user iago.
+Tue Jan 23 18:17:03 2024 Venko server[48631]: File cat.pdf received from user iago.
+Tue Jan 23 18:18:44 2024 Venko server[49172]: Starting Venko Project 1.0.0. server....
+Tue Jan 23 18:18:44 2024 Venko server[49172]: Server STARTED and is listening on port 9091..
+Tue Jan 23 18:18:48 2024 Venko server[49172]: Server Accepted a new connection!.
+Tue Jan 23 18:18:51 2024 Venko server[49172]: Session opened for user iago from 127.0.0.1..
+Tue Jan 23 18:19:19 2024 Venko server[49172]: File file.txt sended to user iago.
+Tue Jan 23 18:19:54 2024 Venko server[49172]: File file.txt received from user iago.
+Tue Jan 23 18:20:21 2024 Venko server[49172]: File cat.pdf removed successfully by user iago.
+Tue Jan 23 18:20:35 2024 Venko server[49172]: Client iago CLOSED connection with Server.

@@ -144,7 +144,7 @@ void Server::helloClient() {
 }
 
 void Server::checkUserDir() {
-    std::string userDirPath{ "./" };
+    std::string userDirPath{ "./home/" };
     userDirPath.append(getCurrentUser());
 
     // Check if the directory already exists
@@ -170,7 +170,7 @@ void Server::checkUserDir() {
 
 void Server::removeFile(std::string fileName) {
 
-    std::string filePath{ "./" };
+    std::string filePath{ "./home/" };
     filePath.append(getCurrentUser());
     filePath.append("/");
     filePath.append(fileName);
@@ -203,7 +203,7 @@ void Server::removeFile(std::string fileName) {
 }
 
 void Server::listFiles() {
-    std::string userDirPath{ "./" };
+    std::string userDirPath{ "./home/" };
     userDirPath.append(getCurrentUser());
 
     std::string files;
@@ -241,7 +241,7 @@ void Server::closeConnection() {
 void Server::sendFile(std::string fileName) {
 
     // Creates local file to send the payload of server
-    std::string filePath{ "./" };
+    std::string filePath{ "./home/" };
     filePath.append(getCurrentUser());
     filePath.append("/");
     filePath.append(fileName);
@@ -290,7 +290,7 @@ void Server::sendFile(std::string fileName) {
 void Server::receiveFile(std::string fileName) {
 
     // Creates local file to get the payload of user
-    std::string filePath{ "./" };
+    std::string filePath{ "./home/" };
     filePath.append(getCurrentUser());
     filePath.append("/");
     filePath.append(fileName);

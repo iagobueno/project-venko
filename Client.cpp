@@ -125,7 +125,7 @@ void Client::endConnection() {
 
     // Send and receive data to confirm that connection was ended
     sendData(msg);
-    std::cout << recData() << std::endl << std::endl;
+    std::cout << recData() << std::endl;
 
     this->quit = true;
 }
@@ -136,7 +136,7 @@ void Client::removeFile(std::string fileName) {
     msg.append(fileName);           // fileName
 
     sendData(msg);
-    std::cout << recData() << std::endl << std::endl;
+    std::cout << recData() << std::endl;
 }
 
 void Client::listFiles() {
@@ -145,7 +145,7 @@ void Client::listFiles() {
     msg.append("list");           // command
 
     sendData(msg);
-    std::cout << recData() << std::endl << std::endl;
+    std::cout << recData() << std::endl;
 }
 
 void Client::helloServer() {
@@ -199,7 +199,7 @@ void Client::getFile(std::string fileName) {
     }
 
     file.close();
-    std::cout << "File downloaded just fine." << std::endl << std::endl;
+    std::cout << "File downloaded just fine." << std::endl;
 }
 
 void Client::uploadFile(std::string filePath) {
@@ -245,7 +245,7 @@ void Client::uploadFile(std::string filePath) {
     }
 
     file.close();
-    std::cout << "File uploaded just fine." << std::endl << std::endl;
+    std::cout << "File uploaded just fine." << std::endl;
 }
 
 void Client::parseInput(std::string inputBuffer) {
