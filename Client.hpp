@@ -23,12 +23,15 @@ public:
     void listFiles();
     void endConnection();
     void removeFile(std::string fileName);
+    void uploadFile(std::string fileName);
+    void getFile(std::string filePath);
 
     void parseInput(std::string inputBuffer);
     void commWithServer();                      // handle all communication with server
 
     constexpr static int BUFFER_SIZE{ 256 };
     constexpr static int MAX_FILE_NAME{ 32 };
+    constexpr static int CHUNK_SIZE{ 1024 };
 
 private:
     int port;                                   // port number

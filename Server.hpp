@@ -21,10 +21,12 @@ public:
     void closeMaster();
 
     // Operational related functions
-    std::string helloClient();
+    void helloClient();
     void listFiles();
     void closeConnection();
     void removeFile(std::string fileName);
+    void sendFile(std::string fileName);
+    void receiveFile(std::string fileName);
 
     // Network message related functions
     void sendData(std::string data);
@@ -38,6 +40,7 @@ public:
     constexpr static int MAX_HOST_NAME{ 50 };
     constexpr static int MAX_CONNECTIONS{ 3 };
     constexpr static int BUFFER_SIZE{ 256 };
+    constexpr static int CHUNK_SIZE{ 1024 };
 
 private:
     int port;                       // port number

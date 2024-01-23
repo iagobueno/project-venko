@@ -16,7 +16,7 @@ Server::Server(const char* port, ServerLog* log) {
     int p = atoi(port);
     setPort(p);
 
-    // set serverlog
+    // Set serverlog
     this->log = log;
 
     // Creates a Socket using IPv4 and TCP protocol
@@ -103,17 +103,17 @@ void Server::sendData(std::string data) {
     int nBytes;
     char buffer[BUFFER_SIZE];
 
-    // clear buffer, convert data string into char* and copy it to buffer
+    // Clear buffer, convert data string into char* and copy it to buffer
     memset(buffer, 0, BUFFER_SIZE);
     const char* cstr = data.c_str();
     memcpy(buffer, cstr, sizeof(buffer));
 
-    // with data copied to buffer, we could send it
+    // With data copied to buffer, we could send it
     nBytes = write(this->newSocket, buffer, BUFFER_SIZE);
 
     if (nBytes < 0)
     {
-        this->log->writeLog("Error while writing on socket.");
+        this->log->writeLog("Error while writing on socket");
     }
 
 }
@@ -126,8 +126,8 @@ std::string Server::getCurrentUser() {
     return this->currentUser;
 }
 
-std::string Server::helloClient() {
-    // build string Connection accepted for client <username> From <IP Address>
+void Server::helloClient() {
+    // Build string Connection accepted for client <username> From <IP Address>
     std::string helloBuffer{ "Session opened for user " };
     helloBuffer.append(getCurrentUser());
     helloBuffer.append(" from ");
@@ -138,9 +138,9 @@ std::string Server::helloClient() {
     helloBuffer.append(cliAddress);
     helloBuffer.append(".");
 
-    // send data across network and return to write on log
+    // Send data across network and return to write on log
+    this->log->writeLog(helloBuffer);
     sendData(helloBuffer);
-    return helloBuffer;
 }
 
 void Server::checkUserDir() {
@@ -156,14 +156,13 @@ void Server::checkUserDir() {
             // Create log string and write log
             std::string logDir{ "Directory for user " };
             logDir.append(getCurrentUser());
-            logDir.append(" was created successfully.");
+            logDir.append(" was created successfully");
             this->log->writeLog(logDir);
         }
         else {
             // Create error log string and write log
             std::string logDir{ "Error creating directory for user " };
             logDir.append(getCurrentUser());
-            logDir.append(".");
             this->log->writeLog(logDir);
         }
     }
@@ -185,7 +184,6 @@ void Server::removeFile(std::string fileName) {
         logBuffer.append(fileName);
         logBuffer.append(" removed successfully by user ");
         logBuffer.append(getCurrentUser());
-        logBuffer.append(".");
 
         // Write log and send message through network
         this->log->writeLog(logBuffer);
@@ -197,7 +195,6 @@ void Server::removeFile(std::string fileName) {
         logBuffer.append(fileName);
         logBuffer.append(" by user ");
         logBuffer.append(getCurrentUser());
-        logBuffer.append(".");
 
         // Write log and send message through network
         this->log->writeLog(logBuffer);
@@ -236,21 +233,114 @@ void Server::closeConnection() {
 
     std::string logBuffer{ "Client " };
     logBuffer.append(getCurrentUser());
-    logBuffer.append(" CLOSED connection with Server.");
+    logBuffer.append(" CLOSED connection with Server");
     log->writeLog(logBuffer);
     sendData("Thanks for using Venko Project 1.0.0.");
 }
 
+void Server::sendFile(std::string fileName) {
+
+    // Creates local file to send the payload of server
+    std::string filePath{ "./" };
+    filePath.append(getCurrentUser());
+    filePath.append("/");
+    filePath.append(fileName);
+
+    std::ifstream file(filePath, std::ios::binary);
+    if (!file.is_open()) {
+        std::cerr << "Error opening file: " << filePath << std::endl;
+        return;
+    }
+
+    // Get the size of the file
+    file.seekg(0, std::ios::end);
+    int fileSize = file.tellg();
+    file.seekg(0, std::ios::beg);
+
+    // Calculate the number of chunks and send it to server
+    int numChunks = (fileSize + CHUNK_SIZE - 1) / CHUNK_SIZE;
+    write(newSocket, &numChunks, sizeof(numChunks));
+
+    // Send the file in chunks
+    char buffer[CHUNK_SIZE];
+    int nBytes;
+    for (int i = 0; i < numChunks; ++i) {
+
+        // Clear buffer
+        memset(buffer, 0, sizeof(buffer));
+
+        // Read a chunk from the file and send over the network
+        file.read(buffer, sizeof(buffer));
+        nBytes = write(newSocket, buffer, sizeof(buffer));
+        if (nBytes < 0)
+        {
+            throw(int)5;
+        }
+    }
+
+    file.close();
+    std::string logBuffer{ "File " };
+    logBuffer.append(fileName);
+    logBuffer.append(" sended to user ");
+    logBuffer.append(getCurrentUser());
+    this->log->writeLog(logBuffer);
+
+}
+
+void Server::receiveFile(std::string fileName) {
+
+    // Creates local file to get the payload of user
+    std::string filePath{ "./" };
+    filePath.append(getCurrentUser());
+    filePath.append("/");
+    filePath.append(fileName);
+
+    std::ofstream file(filePath, std::ios::binary);
+    if (!file.is_open()) {
+        std::cerr << "Error creating file: " << filePath << std::endl;
+        throw(int)1;
+    }
+
+    // Receive the total number of chunks
+    int numChunks;
+    read(newSocket, &numChunks, sizeof(numChunks));
+
+    char buffer[CHUNK_SIZE];
+    int nBytes;
+    // Receive and write each chunk to the file
+    for (int i = 0; i < numChunks; ++i) {
+
+        // Clean the buffer and gets a chunk
+        memset(buffer, 0, sizeof(buffer));
+        nBytes = read(newSocket, buffer, sizeof(buffer));
+
+        if (nBytes < 0) {
+            throw(int)6;
+        }
+
+        // Write the chunk to the file
+        file.write(buffer, nBytes);
+    }
+    file.close();
+
+    // Write on log
+    std::string logBuffer{ "File " };
+    logBuffer.append(fileName);
+    logBuffer.append(" received from user ");
+    logBuffer.append(getCurrentUser());
+    this->log->writeLog(logBuffer);
+}
+
 void Server::parseCliMsg() {
-    std::string s{ this->buffer };              // converts char buffer into string
-    std::istringstream iss(s);                  // then converts string into iss stream
-    std::string protocol, command, arg;         // separate protocol, command and argument
+    std::string s{ this->buffer };              // Converts char buffer into string
+    std::istringstream iss(s);                  // Then converts string into iss stream
+    std::string protocol, command, arg;         // Separate protocol, command and argument
     iss >> protocol; iss >> command; iss >> arg;
 
     if (command == "hello") {
         setCurrentUser(arg);
         checkUserDir();
-        this->log->writeLog(helloClient());
+        helloClient();
     }
     else if (command == "list" || command == "ls") {
         listFiles();
@@ -261,6 +351,12 @@ void Server::parseCliMsg() {
     else if (command == "remove" || command == "rm") {
         removeFile(arg);
     }
+    else if (command == "get") {
+        sendFile(arg);
+    }
+    else if (command == "upload") {
+        receiveFile(arg);
+    }
 }
 
 void Server::handleCliComm() {
@@ -269,15 +365,24 @@ void Server::handleCliComm() {
 
     int nBytes;
     for (;!this->quit;) {
-        // clear buffer and read from socket
+        // Clear buffer and read from socket
         memset(buffer, 0, BUFFER_SIZE);
         nBytes = read(this->newSocket, buffer, BUFFER_SIZE);
 
         if (nBytes < 0) {
-            this->log->writeLog("Error while reading from socket.");
+            this->log->writeLog("Error while reading from socket");
         }
 
-        parseCliMsg();
+        try {
+            parseCliMsg();
+        }
+        catch (int& error) {
+            if (error == 1) {
+                std::string logBuffer{ "Error creating file for user " };
+                logBuffer.append(getCurrentUser());
+                this->log->writeLog(logBuffer);
+            }
+        }
     }
 
     close(this->newSocket);

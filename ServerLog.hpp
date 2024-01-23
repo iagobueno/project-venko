@@ -15,7 +15,7 @@ public:
     ~ServerLog();
 
     void Help();
-    void writeLog(const std::string msg);
+    void writeLog(std::string msg);
 
     void setMode(const int m);
     int getMode();

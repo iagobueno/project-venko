@@ -3,6 +3,7 @@
 #include <ctime>
 #include <iostream>
 #include <fstream>
+#include <string>
 
 ServerLog::ServerLog()
     : mode{ 0 }, pid{ getpid() }, t{ std::time(nullptr) } {
@@ -44,7 +45,8 @@ std::string ServerLog::getTime() {
     return buffer;
 }
 
-void ServerLog::writeLog(const std::string msg) {
+void ServerLog::writeLog(std::string msg) {
+    msg.append(".");
     if (!getMode()) {
         std::cout << msg << std::endl;
     }

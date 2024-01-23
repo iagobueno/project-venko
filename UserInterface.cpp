@@ -14,9 +14,10 @@ void UserInterface::help() {
     std::cout << "You're allowed to do the following in your <fileName>:" << std::endl;
     std::cout << "* use alphabetic characters a-z" << std::endl;
     std::cout << "* use numeric characters 0-9" << std::endl;
+    std::cout << "* use the special chars - and ." << std::endl;
     std::cout << "* use a name with a maximum length of 32" << std::endl << std::endl;
     std::cout << "Example:" << std::endl;
-    std::cout << "  upload file12" << std::endl << std::endl;
+    std::cout << "  upload file12.pdf" << std::endl << std::endl;
 }
 
 void UserInterface::greetings() {
@@ -33,10 +34,11 @@ bool UserInterface::verifyUserName(const std::string uname) {
     }
 
     // if there is any special char
-    if (!isAlfaNum(uname)) {
-        return false;
+    for (char ch : uname) {
+        if (!std::isalnum(ch)) {
+            return false;
+        }
     }
-
     return true;
 }
 
@@ -70,11 +72,24 @@ std::string UserInterface::getBuffer() {
     return this->buffer;
 }
 
-bool UserInterface::isAlfaNum(std::string str) {
-    for (char ch : str) {
+bool UserInterface::sanitizeBuffer(std::string str) {
+
+    char ch;
+    for (size_t i = 0; i < str.length(); ++i) {
+        ch = str[i];
         if (!std::isalnum(ch)) {
-            return false;
+
+            if (ch != '.' && ch != '-') {
+                return false;
+            }
+
+            if (ch == '.') {
+                if (i + 1 < str.length() && str[i + 1] == ch) {
+                    return false;
+                }
+            }
         }
+
     }
     return true;
 }
@@ -91,12 +106,12 @@ std::string UserInterface::readOpt() {
     iss >> arg;
 
     // Checks if there is any special character
-    if (!isAlfaNum(command)) {
+    if (!sanitizeBuffer(command)) {
         throw(int)1;
     }
 
     // Checks if there is any special character
-    if (!isAlfaNum(arg)) {
+    if (!sanitizeBuffer(arg)) {
         throw(int)1;
     }
 

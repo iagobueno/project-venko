@@ -1,14 +1,18 @@
 #include "Client.hpp"
 #include "UserInterface.hpp"
 #include "message.h"
-#include <sstream>
 
+// Streams handle
+#include <sstream>
+#include <fstream>
+#include <iostream>
+
+// C functions
 #include <sys/socket.h>     // socket(), socklen_t
 #include <netdb.h>          // gethostbyname()
 #include <unistd.h>         // gethostname(), read(), write(), NULL
 #include <stdlib.h>         // atoi()
 #include <string.h>         // memset(), memcpy()
-#include <iostream>
 
 Client::Client(const char* port, const char* serverName) {
 
@@ -28,7 +32,7 @@ Client::Client(const char* port, const char* serverName) {
         throw (int)2;
     }
 
-    /* Resolve the name */
+    // Resolve the name
     struct hostent* server;
     if ((server = gethostbyname(serverName)) == NULL) {
         throw (int)3;
@@ -94,7 +98,7 @@ void Client::sendData(std::string data) {
     nBytes = write(this->cliSocket, buffer, BUFFER_SIZE);
     if (nBytes < 0)
     {
-        std::cout << "Error while writing on socket." << std::endl;
+        throw(int)5;
     }
 }
 
@@ -107,7 +111,7 @@ std::string Client::recData() {
     nBytes = read(this->cliSocket, buffer, BUFFER_SIZE);
 
     if (nBytes < 0) {
-        std::cout << "Error while reading from socket." << std::endl;
+        throw(int)6;
     }
 
     std::string ret{ buffer };
@@ -119,7 +123,7 @@ void Client::endConnection() {
     std::string msg{ "0 " };        // protocol version
     msg.append("quit ");            // command
 
-    // Send and receive data to confirm that connection was established
+    // Send and receive data to confirm that connection was ended
     sendData(msg);
     std::cout << recData() << std::endl << std::endl;
 
@@ -155,6 +159,95 @@ void Client::helloServer() {
     std::cout << recData() << std::endl << std::endl;
 }
 
+void Client::getFile(std::string fileName) {
+    std::string msg{ "0 " };        // protocol version
+    msg.append("get ");             // command
+    msg.append(fileName);           // fileName
+
+    // Send string asks for a file to Server
+    sendData(msg);
+
+    // Creates local file to get the payload of server
+    std::string filePath{ "./" };
+    filePath.append(fileName);
+    std::ofstream file(filePath, std::ios::binary);
+
+    if (!file.is_open()) {
+        std::cerr << "Error creating file: " << filePath << std::endl;
+        return;
+    }
+
+    // Receive the total number of chunks
+    int numChunks;
+    read(cliSocket, &numChunks, sizeof(numChunks));
+
+    char buffer[CHUNK_SIZE];
+    int nBytes;
+    // Receive and write each chunk to the file
+    for (int i = 0; i < numChunks; ++i) {
+
+        // clean the buffer and gets a chunk
+        memset(buffer, 0, sizeof(buffer));
+        nBytes = read(cliSocket, buffer, sizeof(buffer));
+
+        if (nBytes < 0) {
+            throw(int)6;
+        }
+
+        // Write the chunk to the file
+        file.write(buffer, nBytes);
+    }
+
+    file.close();
+    std::cout << "File downloaded just fine." << std::endl << std::endl;
+}
+
+void Client::uploadFile(std::string filePath) {
+
+    // Opens file
+    std::ifstream file(filePath, std::ios::binary);
+    if (!file.is_open()) {
+        std::cerr << "Error opening file: " << filePath << std::endl;
+        return;
+    }
+
+    std::string msg{ "0 " };        // protocol version
+    msg.append("upload ");          // command
+    msg.append(filePath);           // userName
+
+    // Send string to annouce that a file is going to be uploaded
+    sendData(msg);
+
+    // Get the size of the file
+    file.seekg(0, std::ios::end);
+    int fileSize = file.tellg();
+    file.seekg(0, std::ios::beg);
+
+    // Calculate the number of chunks and send it to server
+    int numChunks = (fileSize + CHUNK_SIZE - 1) / CHUNK_SIZE;
+    write(cliSocket, &numChunks, sizeof(numChunks));
+
+    // Send the file in chunks
+    char buffer[CHUNK_SIZE];
+    int nBytes;
+    for (int i = 0; i < numChunks; ++i) {
+
+        // clear buffer
+        memset(buffer, 0, sizeof(buffer));
+
+        // Read a chunk from the file and send over the network
+        file.read(buffer, sizeof(buffer));
+        nBytes = write(cliSocket, buffer, sizeof(buffer));
+        if (nBytes < 0)
+        {
+            throw(int)5;
+        }
+    }
+
+    file.close();
+    std::cout << "File uploaded just fine." << std::endl << std::endl;
+}
+
 void Client::parseInput(std::string inputBuffer) {
 
     // extract command and possible argument
@@ -188,10 +281,15 @@ void Client::parseInput(std::string inputBuffer) {
     else if (command == "remove" || command == "rm") {
         removeFile(arg);
     }
+    else if (command == "upload") {
+        uploadFile(arg);
+    }
+    else if (command == "get") {
+        getFile(arg);
+    }
     else {
         throw(int)4;
     }
-
 }
 
 void Client::commWithServer() {
@@ -220,6 +318,12 @@ void Client::commWithServer() {
             }
             else if (error == 4) {
                 std::cout << "Command not found." << std::endl << std::endl;
+            }
+            else if (error == 5) {
+                std::cout << "Error while writing on socket." << std::endl << std::endl;
+            }
+            else if (error == 6) {
+                std::cout << "Error while reading on socket." << std::endl << std::endl;
             }
             else {
                 std::cout << "Unknown error while parsing input." << std::endl << std::endl;

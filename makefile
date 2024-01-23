@@ -44,4 +44,4 @@ run-server:
 #### SANITIZER RULES
 
 clean:
-	rm -f *.o *.gch .elf
+	rm -f *.o *.gch *.elf

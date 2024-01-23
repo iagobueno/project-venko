@@ -18,7 +18,7 @@ public:
     constexpr static int MAX_USER_NAME{ 32 };
 
 private:
-    bool isAlfaNum(std::string str);
+    bool sanitizeBuffer(std::string str);
     std::string getFirstWord(const std::string& str);
     std::string buffer;
     bool verifyUserName(const std::string uname);
