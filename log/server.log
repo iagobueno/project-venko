@@ -38,3 +38,6 @@ Wed Jan 24 23:55:57 2024 Venko server[10910]: Server STARTED and is listening on
 Wed Jan 24 23:56:01 2024 Venko server[10910]: Server Accepted a new connection!.
 Wed Jan 24 23:56:04 2024 Venko server[10910]: Session opened for user iago from 127.0.0.1..
 Wed Jan 24 23:56:06 2024 Venko server[10910]: File a removed successfully by user iago.
+Wed Jan 24 23:57:15 2024 Venko server[10956]: Starting Venko Project 1.0.0. server....
+Wed Jan 24 23:57:15 2024 Venko server[10956]: Server STARTED and is listening on port 9090..
+Wed Jan 24 23:57:26 2024 Venko server[10956]: Server Accepted a new connection!.
