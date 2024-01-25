@@ -167,6 +167,16 @@ void Client::getFile(std::string fileName) {
     // Send string asks for a file to Server
     sendData(msg);
 
+    // Verifica se pode receber arquivo
+    std::string okBuff{ recData() };
+    if (okBuff != "OK") {
+        std::cerr << okBuff << std::endl;
+        return;
+    }
+    else {
+        std::cout << "File removed successfully." << std::endl;
+    }
+
     // Creates local file to get the payload of server
     std::string filePath{ "./" };
     filePath.append(fileName);

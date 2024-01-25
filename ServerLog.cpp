@@ -8,7 +8,11 @@
 ServerLog::ServerLog()
     : mode{ 0 }, pid{ getpid() }, t{ std::time(nullptr) } {
 
+    // abre servidor em modo append
     this->logFile.open("./log/server.log", std::ios::app);
+    if (!logFile.is_open()) {
+        throw(int)1;
+    }
 }
 
 ServerLog::~ServerLog() {
@@ -48,7 +52,7 @@ std::string ServerLog::getTime() {
 void ServerLog::writeLog(std::string msg) {
     msg.append(".");
     if (!getMode()) {
-        std::cout << msg << std::endl;
+        std::cerr << msg << std::endl;
     }
     this->logFile << getTime() << " Venko server[" << getPid() << "]: " << msg << std::endl;
 }

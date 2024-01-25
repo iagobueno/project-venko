@@ -1,5 +1,4 @@
 #include <iostream>
-
 #include "Server.hpp"
 #include "ServerLog.hpp"
 #include <string.h>
@@ -12,12 +11,17 @@ int main(int argc, char* argv[]) {
     try {
         log = new ServerLog{};
     }
-    catch (const std::ofstream::failure& e) {
-        std::cout << "Exception opening/reading ./log/server.log" << std::endl;
+    catch (int& e) {
+        if (e == 1) {
+            std::cerr << "Exception opening/reading ./log/server.log" << std::endl;
+            delete log;
+            exit(1);
+        }
     }
 
     // Check number of command line arguments
     if (argc < 2 || argc > 3) {
+        log->writeLog("Server FAILED to Start. Invalid number of arguments.");
         log->Help();
         delete log;
         exit(1);

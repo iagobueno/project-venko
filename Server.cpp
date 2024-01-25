@@ -57,7 +57,6 @@ Server::Server(const char* port, ServerLog* log) {
     }
 
     this->quit = false;
-
 }
 
 Server::~Server() {
@@ -175,22 +174,8 @@ void Server::removeFile(std::string fileName) {
     filePath.append("/");
     filePath.append(fileName);
 
-    try {
-        // Remove the file
-        std::filesystem::remove(filePath);
-
-        // Create log string
-        std::string logBuffer{ "File " };
-        logBuffer.append(fileName);
-        logBuffer.append(" removed successfully by user ");
-        logBuffer.append(getCurrentUser());
-
-        // Write log and send message through network
-        this->log->writeLog(logBuffer);
-        sendData("File removed succesfully.");
-    }
-    catch (const std::filesystem::filesystem_error& ex) {
-        // Create error log string
+    std::ifstream inputFileStream(filePath);
+    if (!(inputFileStream.is_open())) {
         std::string logBuffer{ "Error while removing file " };
         logBuffer.append(fileName);
         logBuffer.append(" by user ");
@@ -198,8 +183,22 @@ void Server::removeFile(std::string fileName) {
 
         // Write log and send message through network
         this->log->writeLog(logBuffer);
-        sendData("Error while removing file");
+        sendData(logBuffer);
+        return;
     }
+
+    // Remove the file
+    std::filesystem::remove(filePath);
+
+    // Create log string
+    std::string logBuffer{ "File " };
+    logBuffer.append(fileName);
+    logBuffer.append(" removed successfully by user ");
+    logBuffer.append(getCurrentUser());
+
+    // Write log and send message through network
+    this->log->writeLog(logBuffer);
+    sendData("OK");
 }
 
 void Server::listFiles() {
@@ -248,9 +247,16 @@ void Server::sendFile(std::string fileName) {
 
     std::ifstream file(filePath, std::ios::binary);
     if (!file.is_open()) {
-        std::cerr << "Error opening file: " << filePath << std::endl;
+        std::string logBuffer{ "Error opening file: " };
+        logBuffer.append(fileName);
+        logBuffer.append(" for user ");
+        logBuffer.append(getCurrentUser());
+        this->log->writeLog(logBuffer);
+        sendData(logBuffer);
         return;
     }
+
+    sendData("OK");
 
     // Get the size of the file
     file.seekg(0, std::ios::end);
